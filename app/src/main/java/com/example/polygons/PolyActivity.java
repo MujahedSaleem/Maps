@@ -1,5 +1,6 @@
 package com.example.polygons;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
@@ -15,15 +16,26 @@ import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
+import com.opencsv.CSVReader;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.polygons.R.id.map;
 
@@ -55,12 +67,6 @@ public class PolyActivity extends AppCompatActivity
     // Create a stroke pattern of a gap followed by a dot.
     private static final List<PatternItem> PATTERN_POLYLINE_DOTTED = Arrays.asList(GAP, DOT);
 
-    // Create a stroke pattern of a gap followed by a dash.
-    private static final List<PatternItem> PATTERN_POLYGON_ALPHA = Arrays.asList(GAP, DASH);
-
-    // Create a stroke pattern of a dot followed by a gap, a dash, and another gap.
-    private static final List<PatternItem> PATTERN_POLYGON_BETA =
-            Arrays.asList(DOT, GAP, DASH, GAP);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,30 +89,85 @@ public class PolyActivity extends AppCompatActivity
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
-        // Add polylines to the map.
-        // Polylines are useful to show a route or some other connection between points.
-        Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .add(
-                        new LatLng(31.9687  , 35.196717),
-                        new LatLng(31.967120 ,35.198895)
-
-                        ));
-        // Store a data object with the polyline, used here to indicate an arbitrary type.
-        polyline1.setTag("A");
-        // Style the polyline.
-        stylePolyline(polyline1);
-
-
-
-
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(31.969331, 35.195612), 15));
+//here get where are stops done and select road based on it ;
+        Map<String,Map<String,List<Integer>>> road = new HashMap<String,Map<String,List<Integer>>>();
+        Map<String,List<Integer>> cites = new HashMap<>();
+        List<Integer> numberOfRoad = new LinkedList<>();
+        numberOfRoad.add(1);
+        numberOfRoad.add(2);
+        numberOfRoad.add(3);
+        numberOfRoad.add(4);
+        cites.put("Nablus",numberOfRoad);
+        road.put("Ramallah",cites);
+        Intent intent = getIntent();
+        String From = intent.getStringExtra("from");
+        String To = intent.getStringExtra("to");
+        int roadNumber = road.get(From).get(To).get(1);
+        GoogleMap gmap = road(loadStop(googleMap),roadNumber);
 
         // Set listeners for click events.
-        googleMap.setOnPolylineClickListener(this);
+        gmap.setOnPolylineClickListener(this);
     }
+
+    private GoogleMap loadStop(GoogleMap googleMap){
+        try{
+            InputStream mng = getResources().openRawResource(R.raw.hajez);
+            File file = new File(getFilesDir(),"hajze.csv");
+            FileUtils.copyInputStreamToFile(mng, file);
+            CSVReader reader = new CSVReader(new FileReader(file));
+            List<String[]> entary = reader.readAll();
+            mng.close();;
+            reader.close();
+            MarkerOptions markerOptions = new MarkerOptions();
+            for(String[] x :entary){
+                markerOptions.position(new LatLng(Double.parseDouble(x[2]),Double.parseDouble(x[1])));
+                markerOptions.title(x[0]);
+                googleMap.addMarker(markerOptions);
+            }
+        }catch (Exception ex){
+
+        }
+        return googleMap;
+    }
+    private GoogleMap road(GoogleMap googleMap , int roadNumber){
+        try{
+            Map<Integer,Integer> roads = new HashMap<Integer, Integer>();
+            roads.put(1,R.raw.road1);
+            roads.put(2,R.raw.road2);
+            roads.put(3,R.raw.road3);
+            roads.put(4,R.raw.road4);
+
+            InputStream mng = getResources().openRawResource(roads.get(roadNumber));
+            File file = new File(getFilesDir(),"road"+roadNumber+".csv");
+            FileUtils.copyInputStreamToFile(mng, file);
+            CSVReader reader = new CSVReader(new FileReader(file));
+            List<String[]> entary = reader.readAll();
+            mng.close();;
+            reader.close();
+            List <LatLng> lat = new ArrayList<>();
+
+            for(String[] x :entary){
+               lat.add(new LatLng(Double.parseDouble(x[1]),Double.parseDouble(x[2])));
+            }
+            // Polylines are useful to show a route or some other connection between points.
+            Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .addAll(lat));
+            // Store a data object with the polyline, used here to indicate an arbitrary type.
+            polyline1.setTag("A");
+            // Style the polyline.
+            stylePolyline(polyline1);
+            googleMap.moveCamera(
+                    CameraUpdateFactory.
+                            newLatLngZoom(lat.get(0), 11));
+
+
+        }catch (Exception ex){
+
+        }
+        return googleMap;
+    }
+
 
     /**
      * Styles the polyline, based on type.

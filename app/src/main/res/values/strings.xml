@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Polygons</string>
     <string name="title_activity_maps">Polygons</string>
+    <string name="title_activity_main">UI</string>
+
+    <string-array name="city_names">
+        <item> </item>
+        <item>Ramallah</item>
+        <item>Nablus</item>
+
+    </string-array>
+
 </resources>
