@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.polygons">
+    package="com.example.MapDetector">
 
     <application
         android:allowBackup="true"
@@ -8,14 +8,20 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".MainActivity"
-            android:label="@string/title_activity_main">
+        <activity
+            android:name="com.example.MapDetector.Tabed"
+            android:label="@string/title_activity_tabed"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.MapDetector.MainActivity"
+            android:label="@string/title_activity_main">
+
         </activity>
 
         <meta-data
@@ -26,10 +32,8 @@
             android:value="AIzaSyD4T-_WtIWxmWQl4FP0-KxKbp-Jj6DZExs" />
 
         <activity
-            android:name=".PolyActivity"
-            android:label="@string/title_activity_maps">
-
-        </activity>
+            android:name="com.example.MapDetector.PolyActivity"
+            android:label="@string/title_activity_maps"></activity>
     </application>
 
 </manifest>

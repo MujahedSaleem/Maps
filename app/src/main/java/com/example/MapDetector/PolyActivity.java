@@ -1,10 +1,14 @@
-package com.example.polygons;
+package com.example.MapDetector;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.example.MapDetector.ui.main.roads;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -18,11 +22,14 @@ import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.opencsv.CSVReader;
 
 import org.apache.commons.io.FileUtils;
@@ -33,11 +40,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.example.polygons.R.id.map;
+import static com.example.MapDetector.R.id.map;
 
 
 /**
@@ -46,8 +52,8 @@ import static com.example.polygons.R.id.map;
  */
 public class PolyActivity extends AppCompatActivity
         implements
-                OnMapReadyCallback,
-                GoogleMap.OnPolylineClickListener {
+        OnMapReadyCallback,
+        GoogleMap.OnPolylineClickListener {
 
     private static final int COLOR_BLACK_ARGB = 0xff000000;
     private static final int COLOR_WHITE_ARGB = 0xffffffff;
@@ -66,7 +72,9 @@ public class PolyActivity extends AppCompatActivity
 
     // Create a stroke pattern of a gap followed by a dot.
     private static final List<PatternItem> PATTERN_POLYLINE_DOTTED = Arrays.asList(GAP, DOT);
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    String From = "";
+    int roadNumber =0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +83,7 @@ public class PolyActivity extends AppCompatActivity
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
 
+        roadNumber=  getIntent().getExtras().getInt("roadNumebr");
         // Get the SupportMapFragment and request notification when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(map);
@@ -87,67 +96,54 @@ public class PolyActivity extends AppCompatActivity
      * This is where we can add markers or lines, add listeners or move the camera.
      * In this tutorial, we add polylines and polygons to represent routes and areas on the map.
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onMapReady(GoogleMap googleMap) {
-//here get where are stops done and select road based on it ;
-        Map<String,Map<String,List<Integer>>> road = new HashMap<String,Map<String,List<Integer>>>();
-        Map<String,List<Integer>> cites = new HashMap<>();
-        List<Integer> numberOfRoad = new LinkedList<>();
-        numberOfRoad.add(1);
-        numberOfRoad.add(2);
-        numberOfRoad.add(3);
-        numberOfRoad.add(4);
-        cites.put("Nablus",numberOfRoad);
-        road.put("Ramallah",cites);
-        Intent intent = getIntent();
-        String From = intent.getStringExtra("from");
-        String To = intent.getStringExtra("to");
-        int roadNumber = road.get(From).get(To).get(1);
-        GoogleMap gmap = road(loadStop(googleMap),roadNumber);
-
-        // Set listeners for click events.
-        gmap.setOnPolylineClickListener(this);
+        road(loadStop(googleMap),roadNumber);
     }
 
-    private GoogleMap loadStop(GoogleMap googleMap){
-        try{
+    private GoogleMap loadStop(GoogleMap googleMap) {
+        try {
             InputStream mng = getResources().openRawResource(R.raw.hajez);
-            File file = new File(getFilesDir(),"hajze.csv");
+            File file = new File(getFilesDir(), "hajze.csv");
             FileUtils.copyInputStreamToFile(mng, file);
             CSVReader reader = new CSVReader(new FileReader(file));
             List<String[]> entary = reader.readAll();
-            mng.close();;
+            mng.close();
+            ;
             reader.close();
             MarkerOptions markerOptions = new MarkerOptions();
-            for(String[] x :entary){
-                markerOptions.position(new LatLng(Double.parseDouble(x[2]),Double.parseDouble(x[1])));
+            for (String[] x : entary) {
+                markerOptions.position(new LatLng(Double.parseDouble(x[2]), Double.parseDouble(x[1])));
                 markerOptions.title(x[0]);
                 googleMap.addMarker(markerOptions);
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
 
         }
         return googleMap;
     }
-    private GoogleMap road(GoogleMap googleMap , int roadNumber){
-        try{
-            Map<Integer,Integer> roads = new HashMap<Integer, Integer>();
-            roads.put(1,R.raw.road1);
-            roads.put(2,R.raw.road2);
-            roads.put(3,R.raw.road3);
-            roads.put(4,R.raw.road4);
+
+    private GoogleMap road(GoogleMap googleMap, int roadNumber) {
+        try {
+            Map<Integer, Integer> roads = new HashMap<Integer, Integer>();
+            roads.put(1, R.raw.road1);
+            roads.put(2, R.raw.road2);
+            roads.put(3, R.raw.road3);
+            roads.put(4, R.raw.road4);
 
             InputStream mng = getResources().openRawResource(roads.get(roadNumber));
-            File file = new File(getFilesDir(),"road"+roadNumber+".csv");
+            File file = new File(getFilesDir(), "road" + roadNumber + ".csv");
             FileUtils.copyInputStreamToFile(mng, file);
             CSVReader reader = new CSVReader(new FileReader(file));
             List<String[]> entary = reader.readAll();
-            mng.close();;
+            mng.close();
+            ;
             reader.close();
-            List <LatLng> lat = new ArrayList<>();
+            List<LatLng> lat = new ArrayList<>();
 
-            for(String[] x :entary){
-               lat.add(new LatLng(Double.parseDouble(x[1]),Double.parseDouble(x[2])));
+            for (String[] x : entary) {
+                lat.add(new LatLng(Double.parseDouble(x[1]), Double.parseDouble(x[2])));
             }
             // Polylines are useful to show a route or some other connection between points.
             Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
@@ -162,7 +158,7 @@ public class PolyActivity extends AppCompatActivity
                             newLatLngZoom(lat.get(0), 11));
 
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
 
         }
         return googleMap;
@@ -171,6 +167,7 @@ public class PolyActivity extends AppCompatActivity
 
     /**
      * Styles the polyline, based on type.
+     *
      * @param polyline The polyline object that needs styling.
      */
     private void stylePolyline(Polyline polyline) {
@@ -203,6 +200,7 @@ public class PolyActivity extends AppCompatActivity
 
     /**
      * Listens for clicks on a polyline.
+     *
      * @param polyline The polyline object that the user has clicked.
      */
     @Override

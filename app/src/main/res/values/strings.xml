@@ -9,5 +9,19 @@
         <item>Nablus</item>
 
     </string-array>
+    <string-array name="BugType">
+        <item> </item>
+        <item>Accident</item>
+        <item>Closed barrier</item>
+        <item>maintenance</item>
+
+
+    </string-array>
+    <string name="title_activity_tabed">Tabed</string>
+    <string name="tab_text_1">Find Path</string>
+    <string name="tab_text_2">Report a bug</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

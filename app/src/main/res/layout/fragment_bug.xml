@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.BugFragment">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:orientation="vertical"
+        tools:context=".MainActivity" >
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="411dp"
+            android:layout_height="wrap_content"
+            android:text="Type Of Bug" />
+
+        <Spinner
+            android:id="@+id/BugSpinner"
+            android:layout_width="match_parent"
+            android:entries="@array/BugType"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Barrier Name" />
+
+        <Spinner
+            android:id="@+id/BarrierSpinner"
+            android:layout_width="match_parent"
+            android:entries="@array/city_names"
+
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/Report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Report A bug" />
+    </LinearLayout>
+
+</FrameLayout>

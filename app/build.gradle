@@ -4,13 +4,14 @@ android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
     defaultConfig {
-        applicationId "com.example.polygons"
+        applicationId "com.example.MapDetector"
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -18,15 +19,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility = '1.8'
+        sourceCompatibility = '1.8'
+    }
 }
 
 dependencies {
     testImplementation 'junit:junit:4.12'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.google.firebase:firebase-firestore:19.0.2'
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.android.support:appcompat-v7:28.+'
     implementation 'com.android.support:support-v4:28.+'
-    implementation 'com.google.android.gms:play-services-maps:10.2.0'
     implementation "commons-io:commons-io:+"
     implementation "com.opencsv:opencsv:3.9"
+
+    implementation 'com.android.support:multidex:1.0.3'
 }
 
 dependencies {
@@ -39,3 +48,10 @@ dependencies {
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:+'
 }
+
+dependencies {
+    implementation 'com.android.support:design:28.+'
+    implementation 'android.arch.lifecycle:extensions:1.+'
+
+}
+apply plugin: 'com.google.gms.google-services'
