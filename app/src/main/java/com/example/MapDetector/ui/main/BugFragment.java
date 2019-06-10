@@ -21,14 +21,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.opencsv.CSVReader;
-
+import  com.example.MapDetector.Config.Message;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -136,6 +140,7 @@ String barrierName="";
                                 }
                             }); }else{
                            db.collection("bug").add(myBug);
+                           sendPush(myBug.Name+" "+myBug.BugName);
 
                        }
                     }
@@ -147,5 +152,22 @@ String barrierName="";
         });
         return rootView;
     }
+    private void sendPush(String mMessage){
+        Message message = new Message();
+        message.setUser_id("Admin");
+        message.setMessage(mMessage);
+        message.setTimestamp(getTimestamp());
+        db.collection("messages").add(message);
+    }
+    /**
+     * Return the current timestamp in the form of a string
+     * @return
+     */
+    private String getTimestamp(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("Canada/Pacific"));
+        return sdf.format(new Date());
+    }
 
 }
+
