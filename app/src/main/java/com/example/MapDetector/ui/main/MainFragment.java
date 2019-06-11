@@ -2,7 +2,10 @@ package com.example.MapDetector.ui.main;
 
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -22,8 +25,11 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static android.support.v4.content.ContextCompat.getSystemService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,7 +85,12 @@ public class MainFragment extends Fragment {
                 if (From == To) {
                     Toast.makeText(getActivity(), "Can find Path in same city", Toast.LENGTH_LONG).show();
                 } else {
-                    doInBackground();
+                    if(isInternetAvailable() && android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                        doInBackground();
+
+                    }else{
+                        Toast.makeText(getActivity(),"NoInternet Connectin",Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -87,12 +98,21 @@ public class MainFragment extends Fragment {
     }
 
     AtomicReference<roads> takenRoad = new AtomicReference<roads>();
+    Task<QuerySnapshot> road;
+    Task<QuerySnapshot> barrier;
+    public boolean isInternetAvailable() {
+        ConnectivityManager cm =
+                (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    return  isConnected;
+    }
     @RequiresApi(api = Build.VERSION_CODES.N)
     void doInBackground() {
         onPreExecute();
-        Task<QuerySnapshot> road;
-        Task<QuerySnapshot> barrier;
+
         road = db.collection("roads").get();
         barrier = db.collection("bug").get();
 
@@ -137,7 +157,6 @@ public class MainFragment extends Fragment {
 
         });
 
-    road=null;barrier=null;
 
     }
 
@@ -146,6 +165,8 @@ public class MainFragment extends Fragment {
     protected void onPostExecute(Boolean result) {
         if (progressDialog.isShowing()) {
             progressDialog.dismiss();
+            road=null;
+            barrier = null;
         }
         int duration = Toast.LENGTH_SHORT;
 

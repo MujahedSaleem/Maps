@@ -1,6 +1,7 @@
 package com.example.MapDetector;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -146,7 +147,7 @@ public class PolyActivity extends AppCompatActivity
                 lat.add(new LatLng(Double.parseDouble(x[1]), Double.parseDouble(x[2])));
             }
             // Polylines are useful to show a route or some other connection between points.
-            Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
+            Polyline polyline1 = googleMap.addPolyline(new PolylineOptions().color(Color.BLUE)
                     .clickable(true)
                     .addAll(lat));
             // Store a data object with the polyline, used here to indicate an arbitrary type.
@@ -180,6 +181,7 @@ public class PolyActivity extends AppCompatActivity
         switch (type) {
             // If no type is given, allow the API to use the default.
             case "A":
+                polyline.setColor(Color.BLUE);
                 // Use a custom bitmap as the cap at the start of the line.
                 polyline.setStartCap(
                         new CustomCap(
