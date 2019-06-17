@@ -115,8 +115,9 @@ public class PolyActivity extends AppCompatActivity
             reader.close();
             MarkerOptions markerOptions = new MarkerOptions();
             for (String[] x : entary) {
-                markerOptions.position(new LatLng(Double.parseDouble(x[2]), Double.parseDouble(x[1])));
+               markerOptions.position(new LatLng(Double.parseDouble(x[2]), Double.parseDouble(x[1])));
                 markerOptions.title(x[0]);
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.soldier));
                 googleMap.addMarker(markerOptions);
             }
         } catch (Exception ex) {
