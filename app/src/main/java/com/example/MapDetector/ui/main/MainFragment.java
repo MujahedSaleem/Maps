@@ -136,7 +136,7 @@ public class MainFragment extends Fragment {
             for (roads x : destination.numberRoad) {
                 for (String b : x.roadState.barrierName) {
                     for (bugs u : buge) {
-                        if (b.equals( u.Name) && u.BugName != "") {
+                        if (b.toLowerCase().equals( u.Name.toLowerCase()) && u.BugName != "") {
                             flag = true;
                             break;
                         }
